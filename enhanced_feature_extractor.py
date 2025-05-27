@@ -1,15 +1,10 @@
+
 import pandas as pd
 import re
 from urllib.parse import urlparse
 
-# Updated list of suspicious TLDs
-SUSPICIOUS_TLDS = {
-    'xyz', 'gq', 'cf', 'tk', 'ml', 'buzz', 'loan', 'click',
-    'ru', 'cn', 'su', 'top', 'win', 'work'
-}
-
-# Known shorteners
 SHORTENERS = {'bit.ly', 'goo.gl', 't.co', 'tinyurl.com', 'ow.ly', 'buff.ly'}
+SUSPICIOUS_TLDS = {'xyz', 'gq', 'cf', 'tk', 'ml', 'buzz', 'loan', 'click'}
 
 def extract_enhanced_features(df, model_feature_names=None):
     def normalize_url(url):
@@ -61,12 +56,6 @@ def extract_enhanced_features(df, model_feature_names=None):
         except:
             return 0
 
-    def non_latin_script_score(url):
-        try:
-            return 1 if re.search(r'[^\x00-\x7F]', str(url)) else 0
-        except:
-            return 0
-
     def is_shortener(domain):
         try:
             return 1 if domain in SHORTENERS else 0
@@ -91,18 +80,6 @@ def extract_enhanced_features(df, model_feature_names=None):
         except:
             return 0
 
-    def subdomain_token_count(domain):
-        try:
-            return max(0, len(domain.split('.')) - 2)
-        except:
-            return 0
-
-    def contains_punycode(domain):
-        try:
-            return 1 if 'xn--' in domain else 0
-        except:
-            return 0
-
     # Start transformation
     df['url'] = df.iloc[:, 0].apply(normalize_url)
     df['domain'] = df['url'].apply(lambda x: urlparse(x).netloc)
@@ -113,13 +90,10 @@ def extract_enhanced_features(df, model_feature_names=None):
     df['path_depth'] = df['url'].apply(path_depth)
     df['has_keywords'] = df['url'].apply(has_keywords)
     df['cyrillic_in_url'] = df['url'].apply(cyrillic_in_url)
-    df['non_latin_script_score'] = df['url'].apply(non_latin_script_score)
     df['is_shortener'] = df['domain'].apply(is_shortener)
     df['has_ref_param'] = df['url'].apply(has_ref_param)
     df['is_suspicious_tld'] = df['tld'].apply(is_suspicious_tld)
     df['is_generic_profile_path'] = df['url'].apply(is_generic_profile_path)
-    df['subdomain_token_count'] = df['domain'].apply(subdomain_token_count)
-    df['contains_punycode'] = df['domain'].apply(contains_punycode)
 
     # One-hot encode TLDs
     df = pd.get_dummies(df, columns=['tld'], drop_first=True)
