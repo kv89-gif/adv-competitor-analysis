@@ -30,3 +30,10 @@ if uploaded_file:
 
         # Offer download
         st.download_button(
+            "📥 Download Results",
+            df.to_csv(index=False).encode("utf-8"),
+            "classified_backlinks.csv",
+            "text/csv"
+        )
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
