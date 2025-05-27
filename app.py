@@ -4,11 +4,11 @@ import pandas as pd
 import joblib
 from enhanced_feature_extractor import extract_enhanced_features
 
-st.title("🧠 Backlink Spam Classifier v3")
+st.title("🧠 Backlink Spam Classifier v4")
 
 @st.cache_resource
 def load_model():
-    return joblib.load("spam_model_v3.pkl")
+    return joblib.load("spam_model_v4.pkl")
 
 model = load_model()
 
